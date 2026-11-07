@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MY DATABASE - TACTICAL CANNABIS TERMINAL</title>
+<style>
+  :root {
+    --bg: #03080e;
+    --card-bg: rgba(6, 18, 30, 0.94);
+    --border: rgba(0, 240, 255, 0.25);
+    --cyan: #00f0ff;
+    --pink: #ff0055;
+    --gold: #ffb703;
+    --purple: #b5179e;
+    --green: #00f59b;
+    --font-mono: 'Consolas', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: #c9e6ff;
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    padding: 12px;
+    background-image: radial-gradient(circle at 50% 15%, #0a2238 0%, #03080e 85%);
+  }
+  header {
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+  }
+  .header-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 1.25rem;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    text-shadow: 0 0 10px rgba(0,240,255,0.6);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  button {
+    background: rgba(0,240,255,0.08);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    font-family: inherit;
+    font-size: 0.7rem;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+  }
+  button:active {
+    background: var(--cyan);
+    color: #000;
+  }
+  button.wiki-btn {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(0,245,155,0.1);
+  }
+  button.share-btn {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(255,183,3,0.1);
+  }
+  button.link-btn {
+    border-color: #38bdf8;
+    color: #38bdf8;
+    background: rgba(56,189,248,0.1);
+  }
+  button.reset-btn {
+    border-color: #ff3366;
+    color: #ff3366;
+  }
+
+  .guest-banner {
+    display: none;
+    background: rgba(255,183,3,0.12);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .vibe-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .vibe-bar::-webkit-scrollbar { display: none; }
+  .vibe-btn {
+    background: rgba(10, 34, 56, 0.6);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    color: #79a5cc;
+    font-size: 0.68rem;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .vibe-btn.active {
+    background: rgba(0, 240, 255, 0.18);
+    border-color: var(--cyan);
+    color: #fff;
+    box-shadow: 0 0 8px rgba(0,240,255,0.3);
+  }
+
+  .layout-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media(min-width: 960px) {
+    .layout-container {
+      grid-template-columns: 1fr 390px;
+    }
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  }
+  .card:hover, .card.active {
+    transform: translateY(-3px) scale(1.01);
+    border-color: var(--cyan);
+    box-shadow: 0 8px 24px rgba(0,240,255,0.25);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.03) 30%,
+      rgba(0, 240, 255, 0.12) 48%,
+      rgba(255, 0, 128, 0.12) 52%,
+      rgba(255, 215, 0, 0.12) 56%,
+      transparent 70%
+    );
+    opacity: 0.35;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s;
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
+  .card:hover::before, .card:active::before {
+    transform: translateX(100%);
+    opacity: 0.9;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .card-title {
+    font-size: 0.98rem;
+    font-weight: bold;
+    color: #fff;
+  }
+  .card-badges {
+    display: flex;
+    gap: 5px;
+  }
+  .badge {
+    font-size: 0.62rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .badge-exotic { background: rgba(255, 183, 3, 0.15); border: 1px solid var(--gold); color: var(--gold); }
+  .badge-legendary { background: rgba(255, 128, 0, 0.15); border: 1px solid #ff8000; color: #ff9933; }
+  .badge-epic { background: rgba(181, 23, 158, 0.15); border: 1px solid var(--purple); color: #ff54f0; }
+  .badge-uncommon { background: rgba(0, 245, 155, 0.15); border: 1px solid var(--green); color: var(--green); }
+  .badge-cbd { background: rgba(0, 240, 255, 0.15); border: 1px solid var(--cyan); color: var(--cyan); }
+
+  .card-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #79a5cc;
+    margin-bottom: 8px;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .tag {
+    background: rgba(0,240,255,0.05);
+    border: 1px solid rgba(0,240,255,0.15);
+    font-size: 0.65rem;
+    color: #9cd5ff;
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed rgba(0,240,255,0.15);
+    padding-top: 8px;
+    font-size: 0.72rem;
+  }
+  .wv-link {
+    color: var(--green);
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.7rem;
+    background: rgba(0,245,155,0.1);
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,245,155,0.3);
+  }
+  .wv-link:hover {
+    background: var(--green);
+    color: #000;
+  }
+
+  .dossier {
+    background: var(--card-bg);
+    border: 1px solid var(--cyan);
+    border-radius: 8px;
+    padding: 16px;
+    position: sticky;
+    top: 12px;
+    box-shadow: 0 0 15px rgba(0,240,255,0.15);
+  }
+  .dossier-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .dossier h2 {
+    font-size: 1.15rem;
+    color: #fff;
+    text-shadow: 0 0 8px rgba(0,240,255,0.4);
+  }
+  .radar-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+    background: rgba(3, 10, 18, 0.7);
+    border: 1px solid rgba(0,240,255,0.15);
+    border-radius: 6px;
+    padding: 8px;
+  }
+  .deduct-bar {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .deduct-bar button {
+    flex: 1;
+    padding: 6px 2px;
+  }
+
+  .wiki-badge {
+    cursor: pointer;
+    text-decoration: underline dotted var(--cyan);
+    color: var(--cyan);
+    font-weight: bold;
+    transition: all 0.15s ease;
+  }
+  .wiki-badge:hover {
+    color: #fff;
+    text-shadow: 0 0 6px var(--cyan);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #00f0ff;
+    color: #000;
+    font-weight: bold;
+    font-size: 0.75rem;
+    padding: 8px 16px;
+    border-radius: 4px;
+    box-shadow: 0 0 15px rgba(0,240,255,0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 2000;
+  }
+  .toast.show {
+    opacity: 1;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 12, 0.88);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+  }
+  .modal-overlay.open {
+    display: flex;
+  }
+  .modal {
+    background: #051424;
+    border: 1px solid var(--cyan);
+    border-radius: 8px;
+    max-width: 580px;
+    width: 100%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 25px rgba(0,240,255,0.3);
+    overflow: hidden;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,240,255,0.05);
+  }
+  .modal-header h3 {
+    font-size: 1rem;
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal-close {
+    background: transparent;
+    border: none;
+    color: #ff3366;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 2px 8px;
+  }
+  .modal-search {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(0,240,255,0.15);
+    background: rgba(3, 10, 18, 0.6);
+  }
+  .modal-search input {
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    outline: none;
+  }
+  .modal-search input:focus {
+    border-color: var(--cyan);
+  }
+  .modal-body {
+    padding: 16px;
+    overflow-y: auto;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: #b5daf8;
+  }
+  .wiki-entry {
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed rgba(0,240,255,0.15);
+  }
+  .wiki-entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .wiki-entry-title {
+    color: var(--cyan);
+    font-size: 0.95rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .wiki-entry-cat {
+    font-size: 0.62rem;
+    padding: 1px 5px;
+    border-radius: 2px;
+    background: rgba(0,240,255,0.12);
+    color: #79c8f8;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1><span>❖</span> MY DATABASE</h1>
+    <div class="header-actions">
+      <button class="share-btn" onclick="copyChatMenu()">📋 MENÜ KOPIEREN</button>
+      <button class="link-btn" onclick="copyLiveLink()">🔗 LIVE LINK</button>
+      <button class="wiki-btn" onclick="openWiki()">📖 WIKI</button>
+      <button class="reset-btn" id="resetBtn" onclick="resetDefault()">RESET</button>
+    </div>
+  </div>
+
+  <div class="guest-banner" id="guestBanner">
+    <span>🔒 GAST-MODUS (Session Ansicht aktiv – Stash schreibgeschützt)</span>
+    <button onclick="exitGuestMode()" style="padding:2px 6px; font-size:0.65rem;">ZUM EIGENEN INVENTAR</button>
+  </div>
+
+  <div class="vibe-bar">
+    <button class="vibe-btn active" onclick="setVibeFilter('all', this)">ALLE (12)</button>
+    <button class="vibe-btn" onclick="setVibeFilter('focus', this)">🎮 FOCUS / GAMING</button>
+    <button class="vibe-btn" onclick="setVibeFilter('intimacy', this)">💖 INTIMACY / BODY</button>
+    <button class="vibe-btn" onclick="setVibeFilter('chill', this)">🛋️ CHILL / SLEEP</button>
+    <button class="vibe-btn" onclick="setVibeFilter('cbd', this)">🌿 CBD TRÄGER</button>
+  </div>
+</header>
+
+<div class="layout-container">
+  <div class="grid" id="strainGrid"></div>
+
+  <div class="dossier" id="dossier">
+    <div class="dossier-header">
+      <h2 id="dossierTitle">DOSSIER SELEKTION</h2>
+      <span id="dossierSlot" style="color:var(--cyan); font-size:0.75rem; font-weight:bold;"></span>
+    </div>
+    <div id="dossierContent" style="font-size:0.8rem; line-height: 1.5; color:#95c6f0;">
+      Wähle eine Sammelkarte links aus, um detaillierte WeedViewer-Metriken und das Wirkungs-Radar anzuzeigen.
+    </div>
+    <div class="radar-box" id="radarBox" style="display:none;">
+      <svg id="radarSvg" width="260" height="200" viewBox="0 0 300 240"></svg>
+    </div>
+    <div id="dossierExtra" style="font-size:0.75rem; line-height:1.45; color:#8ab8e0;"></div>
+    <div class="deduct-bar" id="deductBar" style="display:none;">
+      <button onclick="modifyGrams(-0.1)">-0.1g</button>
+      <button onclick="modifyGrams(-0.2)">-0.2g</button>
+      <button onclick="modifyGrams(-0.5)">-0.5g</button>
+      <button onclick="modifyGrams(+0.5)">+0.5g</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastMsg">KOPIERT!</div>
+
+<!-- Modal: Cyber Wiki -->
+<div class="modal-overlay" id="wikiModal" onclick="if(event.target===this) closeWiki()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><span>📖</span> TERMINAL WIKI & GLOSSAR</h3>
+      <button class="modal-close" onclick="closeWiki()">✕</button>
+    </div>
+    <div class="modal-search">
+      <input type="text" id="wikiSearch" placeholder="Begriff, Terpen oder Wirkung suchen..." oninput="filterWiki()">
+    </div>
+    <div class="modal-body" id="wikiBody"></div>
+  </div>
+</div>
+
+<script>
+const INITIAL_DATA = [
+  {
+    id: 1, name: "RS11", thc: "29%", tier: "EXOTIC", type: "HYBRID", stock: 1.0,
+    vibes: ["intimacy", "chill"],
+    tags: ["relaxing", "focus", "creative"],
+    terpenes: ["Caryophyllen", "Limonen", "Linalool"],
+    aroma: "Süß-säuerlich, Fruchtig, Gas",
+    effectsText: "Starke Euphorie mit intensiver sensorischer Taktilität, gefolgt von tiefer körperlicher Ausgeglichenheit.",
+    radar: { euphoria: 95, tactility: 96, focus: 65, bodyMelt: 82, sedation: 68 },
+    url: "https://www.weedviewer.com/strain/fyta-rs-11"
+  },
+  {
+    id: 2, name: "Zoap", thc: "28%", tier: "EXOTIC", type: "HYBRID", stock: 1.0,
+    vibes: ["intimacy", "focus"],
+    tags: ["social", "relaxing", "giggly"],
+    terpenes: ["Caryophyllen", "Humulen", "Limonen"],
+    aroma: "Blumig, Seifig-süß, Zitrus",
+    effectsText: "Ausgeprägte Heiterkeit, Redseligkeit und körperliche Leichtigkeit ohne dumpfen Hangover.",
+    radar: { euphoria: 92, tactility: 88, focus: 78, bodyMelt: 75, sedation: 55 },
+    url: "https://www.weedviewer.com/strains/?search=Zoap"
+  },
+  {
+    id: 3, name: "Blue Gelato Cali", thc: "28%", tier: "EXOTIC", type: "INDICA", stock: 2.0,
+    vibes: ["chill"],
+    tags: ["bodyhigh", "relaxing", "sleep"],
+    terpenes: ["Myrcen", "Caryophyllen", "Pinen"],
+    aroma: "Beere, Erdig, Süßes Gebäck",
+    effectsText: "Tiefes körperliches Einsinken, vollständige Muskelentspannung und effektiver Couch-Lock.",
+    radar: { euphoria: 75, tactility: 70, focus: 35, bodyMelt: 95, sedation: 92 },
+    url: "https://www.weedviewer.com/strains/?search=Blue+Gelato"
+  },
+  {
+    id: 4, name: "Blue Dream", thc: "26%", tier: "LEGENDARY", type: "HYBRID", stock: 1.0,
+    vibes: ["focus", "intimacy"],
+    tags: ["uplifting", "energizing", "focus"],
+    terpenes: ["Myrcen", "Pinen", "Caryophyllen"],
+    aroma: "Blaubeere, Süße Zeder, Vanille",
+    effectsText: "Klares Kopf-High, gesteigerte Sinneswahrnehmung und sanfte, schmerzstillende Entspannung.",
+    radar: { euphoria: 90, tactility: 92, focus: 85, bodyMelt: 68, sedation: 45 },
+    url: "https://www.weedviewer.com/strain/fyta-blue-dream"
+  },
+  {
+    id: 5, name: "Ice Cream Cake", thc: "26%", tier: "LEGENDARY", type: "HYBRID", stock: 1.0,
+    vibes: ["chill"],
+    tags: ["relaxing", "bodyhigh", "sleep"],
+    terpenes: ["Caryophyllen", "Limonen", "Linalool"],
+    aroma: "Vanille-Teig, Süße Creme, Würze",
+    effectsText: "Schwere Sedierung, schaltet kreisende Gedanken zuverlässig ab und fördert tiefen Schlaf.",
+    radar: { euphoria: 72, tactility: 65, focus: 30, bodyMelt: 94, sedation: 96 },
+    url: "https://www.weedviewer.com/strains/?search=Ice+Cream+Cake"
+  },
+  {
+    id: 6, name: "Amnesia Haze", thc: "25%", tier: "LEGENDARY", type: "SATIVA", stock: 1.0,
+    vibes: ["focus"],
+    tags: ["uplifting", "creative"],
+    terpenes: ["Terpinolen", "Pinen", "Myrcen"],
+    aroma: "Zitrone, Würzig-erdig, Haze-Pfeffer",
+    effectsText: "Energetisierendes Sativa-High, treibt kreative Flows und langanhaltende Euphorie an.",
+    radar: { euphoria: 94, tactility: 60, focus: 92, bodyMelt: 40, sedation: 25 },
+    url: "https://www.weedviewer.com/strains/?search=Amnesia+Haze"
+  },
+  {
+    id: 7, name: "Lemon Haze", thc: "25%", tier: "EPIC", type: "SATIVA", stock: 1.0,
+    vibes: ["focus"],
+    tags: ["uplifting", "creative", "focus"],
+    terpenes: ["Limonen", "Terpinolen", "Caryophyllen"],
+    aroma: "Säuerliche Zitrone, Skunk, Frische Schale",
+    effectsText: "Stimmungsaufhellend, motivierend und ideal für Gaming-Sessions oder Aktivitäten.",
+    radar: { euphoria: 90, tactility: 65, focus: 95, bodyMelt: 38, sedation: 20 },
+    url: "https://www.weedviewer.com/strains/?search=Lemon+Haze"
+  },
+  {
+    id: 8, name: "Rainbow Bacio", thc: "24%", tier: "EPIC", type: "HYBRID", stock: 1.0,
+    vibes: ["chill", "intimacy"],
+    tags: ["relaxing", "bodyhigh"],
+    terpenes: ["Caryophyllen", "Limonen", "Humulen"],
+    aroma: "Süße Früchte, Gas, Kakao",
+    effectsText: "Körperlich warmer Schmelz mit langanhaltender wohliger Gelassenheit.",
+    radar: { euphoria: 80, tactility: 82, focus: 58, bodyMelt: 86, sedation: 74 },
+    url: "https://www.weedviewer.com/strains/?search=Rainbow+Bacio"
+  },
+  {
+    id: 9, name: "White Widow", thc: "21.5%", tier: "UNCOMMON", type: "HYBRID", stock: 1.0,
+    vibes: ["chill", "focus"],
+    tags: ["anxietyRelief", "relaxing"],
+    terpenes: ["Myrcen", "Pinen", "Caryophyllen"],
+    aroma: "Erdig, Holzig, Scharfer Pfeffer",
+    effectsText: "Der Klassiker für mentale Entlastung, baut innere Anspannung ab ohne zu ermüden.",
+    radar: { euphoria: 82, tactility: 68, focus: 75, bodyMelt: 72, sedation: 50 },
+    url: "https://www.weedviewer.com/strain/growery-white-widow"
+  },
+  {
+    id: 10, name: "Sour Diesel", thc: "21.5%", tier: "UNCOMMON", type: "SATIVA", stock: 1.0,
+    vibes: ["focus"],
+    tags: ["energizing", "clarity"],
+    terpenes: ["Myrcen", "Limonen", "Caryophyllen"],
+    aroma: "Stechender Diesel, Zitrone, Kräuter",
+    effectsText: "Schnell einsetzendes, zerebrales High für rasche Wachheit und gedankliche Klarheit.",
+    radar: { euphoria: 88, tactility: 55, focus: 96, bodyMelt: 35, sedation: 18 },
+    url: "https://www.weedviewer.com/strains/?search=Sour+Diesel"
+  },
+  {
+    id: 11, name: "Strawberry Haze (CBD)", thc: "<0.2%", tier: "CBD", type: "SATIVA", stock: 5.0,
+    vibes: ["cbd", "intimacy"],
+    tags: ["sweet", "relaxing", "active"],
+    terpenes: ["Limonen", "Myrcen", "Terpinolen"],
+    aroma: "Süße Erdbeere, Haze, Blumig",
+    effectsText: "Keine psychoaktive Berauschung. Idealer geschmackvoller Träger für sinnliche Mischungen.",
+    radar: { euphoria: 30, tactility: 60, focus: 70, bodyMelt: 65, sedation: 25 },
+    url: "https://luckyhemp.de"
+  },
+  {
+    id: 12, name: "Candy Kush (CBD)", thc: "<0.2%", tier: "CBD", type: "INDICA", stock: 5.0,
+    vibes: ["cbd", "chill"],
+    tags: ["calming", "fruity", "sleep"],
+    terpenes: ["Myrcen", "Caryophyllen", "Linalool"],
+    aroma: "Karamell, Waldbeere, Weich-süß",
+    effectsText: "Entspannender CBD-Träger zum Abpuffern hoher THC-Werte vor der Nachtruhe.",
+    radar: { euphoria: 25, tactility: 50, focus: 30, bodyMelt: 80, sedation: 70 },
+    url: "https://luckyhemp.de"
+  }
+];
+
+const WIKI_ENTRIES = [
+  {
+    id: "tactility",
+    title: "Taktilität (Tactile / Berührungssensibilität)",
+    category: "Neuro-Achse",
+    keywords: ["taktil", "tactile", "sex", "intimacy", "haut", "berührung", "sinnlichkeit"],
+    content: "Bezeichnet die gesteigerte Empfindsamkeit der Haut und Nervenenden für Berührungen, Wärme und Vibrationen. Durch die Gefäßerweiterung (Vasodilatation) von reinem Cannabis wird die Durchblutung in Gewebe und Schleimhäuten gesteigert. Sorten mit hoher Taktilität (wie <strong>RS11</strong> oder <strong>Blue Dream</strong>) intensivieren Intimität und körperliche Nähe spürbar."
+  },
+  {
+    id: "euphoria",
+    title: "Euphorie (Euphoria / Kopf-High)",
+    category: "Neuro-Achse",
+    keywords: ["euphorie", "euphoria", "head", "high", "glück", "lachen"],
+    content: "Das Gefühl von gehobener Stimmung, Heiterkeit und mentaler Leichtigkeit. Entsteht vor allem durch die Bindung von THC an die CB1-Rezeptoren im Gehirn, was die Dopamin-Ausschüttung anregt."
+  },
+  {
+    id: "focus",
+    title: "Fokus & Energy (Zerebrale Klarheit)",
+    category: "Neuro-Achse",
+    keywords: ["fokus", "focus", "energy", "gaming", "wach", "kreativ"],
+    content: "Ein waches, energetisierendes Kopf-High ohne geistige Verwirrung oder Trägheit. Ideal für Gaming, kreatives Arbeiten oder Unterhaltungen. Typisch für Sativa-dominante Sorten wie <strong>Sour Diesel</strong> oder <strong>Lemon Haze</strong>."
+  },
+  {
+    id: "bodymelt",
+    title: "Body Melt (Körperliche Muskelentspannung)",
+    category: "Neuro-Achse",
+    keywords: ["body", "bodymelt", "körper", "muskeln", "schmelzen", "entspannung"],
+    content: "Ein warmes, schweres und gelöstes Körpergefühl. Verspannungen in Nacken, Rücken und Kiefer lösen sich auf. Die Muskeln lassen spürbar locker."
+  },
+  {
+    id: "sedation",
+    title: "Sedierung (Couch-Lock / Schlaf)",
+    category: "Neuro-Achse",
+    keywords: ["sedation", "sedierung", "sleep", "schlaf", "couch", "müde"],
+    content: "Die Tendenz einer Sorte, schläfrig zu machen und tiefen Schlaf einzuleiten. Schaltet kreisende Gedanken ab. Extrem ausgeprägt bei Indica-Sorten wie <strong>Ice Cream Cake</strong> oder <strong>Blue Gelato Cali</strong>."
+  },
+  {
+    id: "terpene",
+    title: "Terpene (Was sind sie?)",
+    category: "Grundlagen",
+    keywords: ["terpen", "terpene", "aroma", "wirkung", "entourage"],
+    content: "Aromatische Kohlenwasserstoffe, die in den Harzdrüsen (Trichomen) der Knospen gebildet werden. Sie verleihen jeder Sorte ihren charakteristischen Geruch und modulieren im <strong>Entourage-Effekt</strong> die Wirkung von THC und CBD."
+  },
+  {
+    id: "caryophyllen",
+    title: "Beta-Caryophyllen",
+    category: "Terpen",
+    keywords: ["caryophyllen", "pfeffer", "würzig", "cb2"],
+    content: "Dockt direkt wie ein Cannabinoid an den CB2-Rezeptor an. Aroma: Scharfer Pfeffer, Holz, Gewürze. Wirkung: Entzündungshemmend, angstlösend und schmerzlindernd. Reichlich in <strong>RS11</strong>, <strong>Zoap</strong> und <strong>Ice Cream Cake</strong>."
+  },
+  {
+    id: "myrcen",
+    title: "Myrcen",
+    category: "Terpen",
+    keywords: ["myrcen", "erdig", "couchlock", "schlaf", "mango"],
+    content: "Das am häufigsten vorkommende Terpen. Aroma: Erdig, moschusartig. Wirkung: Stark beruhigend, muskelentspannend und sedierend."
+  },
+  {
+    id: "limonen",
+    title: "Limonen",
+    category: "Terpen",
+    keywords: ["limonen", "zitrone", "stimmung", "euphorie", "frisch"],
+    content: "Aroma: Frische Zitrone, Zitrusfrüchte. Wirkung: Stimmungsaufhellend und stressabbauend. Verleiht Sativas wie <strong>Lemon Haze</strong> ihr heiteres Kopfgefühl."
+  },
+  {
+    id: "linalool",
+    title: "Linalool",
+    category: "Terpen",
+    keywords: ["linalool", "lavendel", "blumen", "angst", "ruhe"],
+    content: "Aroma: Blumiger Lavendel. Wirkung: Stark beruhigend auf das zentrale Nervensystem, angstlösend und schlaffördernd."
+  },
+  {
+    id: "pinen",
+    title: "Pinen (Alpha/Beta)",
+    category: "Terpen",
+    keywords: ["pinen", "kiefer", "wald", "gedächtnis", "fokus"],
+    content: "Aroma: Frische Kiefernnadeln, Rosmarin. Wirkung: Bronchienerweiternd, schützt das Kurzzeitgedächtnis vor zu starkem THC-Vergessen."
+  },
+  {
+    id: "cbd_ratio",
+    title: "CBD als Träger & Puffer (Mikrodosierung)",
+    category: "Alchemie",
+    keywords: ["cbd", "träger", "nikotinfrei", "lucky hemp", "verhältnis", "ratio"],
+    content: "CBD bindet als Modulator an CB1-Rezeptoren und verhindert, dass hochprozentiges Cali-Weed Herzrasen oder Paranoia auslöst. Ermöglicht samtigen Rauch und volle Taktilität."
+  }
+];
+
+let strains = [];
+let activeId = null;
+let currentVibe = "all";
+let isGuestMode = false;
+
+function loadData() {
+  const hash = window.location.hash;
+  if (hash && hash.startsWith("#stash=")) {
+    try {
+      const encoded = hash.replace("#stash=", "");
+      const decoded = decodeURIComponent(atob(encoded));
+      const parsedStock = JSON.parse(decoded);
+      
+      strains = JSON.parse(JSON.stringify(INITIAL_DATA));
+      parsedStock.forEach(item => {
+        const found = strains.find(s => s.id === item.id);
+        if (found) found.stock = item.stock;
+      });
+      isGuestMode = true;
+      document.getElementById("guestBanner").style.display = "flex";
+      document.getElementById("resetBtn").style.display = "none";
+      return;
+    } catch (e) {
+      console.warn("Konnte Stash-Hash nicht parsen, lade regulären Speicher.", e);
+    }
+  }
+
+  try {
+    const raw = localStorage.getItem("cannabis_db_vibe");
+    strains = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(INITIAL_DATA));
+  } catch (e) {
+    strains = JSON.parse(JSON.stringify(INITIAL_DATA));
+  }
+}
+
+function saveData() {
+  if (isGuestMode) return;
+  try {
+    localStorage.setItem("cannabis_db_vibe", JSON.stringify(strains));
+  } catch (e) {}
+}
+
+function resetDefault() {
+  strains = JSON.parse(JSON.stringify(INITIAL_DATA));
+  saveData();
+  renderGrid();
+  selectStrain(strains[0].id);
+  showToast("SYSTEM ZURÜCKGESETZT");
+}
+
+function exitGuestMode() {
+  window.location.hash = "";
+  location.reload();
+}
+
+function setVibeFilter(vibe, btn) {
+  currentVibe = vibe;
+  document.querySelectorAll(".vibe-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderGrid();
+}
+
+function renderGrid() {
+  const grid = document.getElementById("strainGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+
+  const filtered = strains.filter(s => {
+    if (currentVibe === "all") return true;
+    return s.vibes.includes(currentVibe);
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1; padding:20px; text-align:center; color:#5283a8;">Keine Sorten für diesen Vibe gefunden.</div>`;
+    return;
+  }
+
+  filtered.forEach(s => {
+    const card = document.createElement("div");
+    card.className = `card ${activeId === s.id ? 'active' : ''}`;
+    card.onclick = () => selectStrain(s.id);
+
+    const tierClass = `badge-${s.tier.toLowerCase()}`;
+
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-title">${s.name}</span>
+        <div class="card-badges">
+          <span class="badge ${tierClass}">${s.tier}</span>
+          <span class="badge" style="background:#0c283d; color:#7ec4f8;">${s.type}</span>
+        </div>
+      </div>
+      <div class="card-stats">
+        <span>THC: <strong>${s.thc}</strong></span>
+        <span>BESTAND: <strong style="color:var(--cyan);">${s.stock.toFixed(1)}g</strong></span>
+      </div>
+      <div class="tags">
+        ${s.tags.map(t => `<span class="tag">#${t}</span>`).join("")}
+      </div>
+      <div class="card-footer">
+        <span style="color:#5283a8;">SLOT 0${s.id}</span>
+        <a class="wv-link" href="${s.url}" target="_blank" onclick="event.stopPropagation()">WEEDVIEWER ↗</a>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function selectStrain(id) {
+  activeId = id;
+  const s = strains.find(item => item.id === id);
+  if (!s) return;
+
+  renderGrid();
+
+  document.getElementById("dossierTitle").innerText = s.name;
+  document.getElementById("dossierSlot").innerText = `SLOT 0${s.id}`;
+  
+  document.getElementById("dossierContent").innerHTML = `
+    <div style="margin-bottom:6px;"><strong>Kategorie:</strong> <span style="color:#fff;">${s.tier}</span> | <strong>Genetik:</strong> ${s.type}</div>
+    <div style="margin-bottom:6px;"><strong>Wirkstoff-Potenz:</strong> <span style="color:var(--cyan); font-weight:bold;">${s.thc} THC</span></div>
+    <div style="margin-bottom:8px;"><strong>Aktueller Vorrat:</strong> <span style="font-size:1.15rem; color:#fff; font-weight:bold;">${s.stock.toFixed(1)}g</span></div>
+    <div style="padding:6px 8px; background:rgba(0,240,255,0.06); border-left:2px solid var(--cyan); margin-bottom:8px; font-size:0.75rem;">
+      ${s.effectsText}
+    </div>
+  `;
+
+  document.getElementById("radarBox").style.display = "flex";
+  drawRadar(s.radar);
+
+  const terpeneBadges = s.terpenes.map(t => {
+    return `<span class="wiki-badge" onclick="openWikiEntry('${t.toLowerCase()}')">${t}</span>`;
+  }).join(", ");
+
+  document.getElementById("dossierExtra").innerHTML = `
+    <div style="margin-top:6px;"><strong>Aromen:</strong> ${s.aroma}</div>
+    <div style="margin-top:5px;"><strong>Leitterpene:</strong> <span style="color:#a6d4ff;">${terpeneBadges}</span> <span style="font-size:0.65rem; color:#5283a8;">(Tippen für Wiki)</span></div>
+    <div style="margin-top:8px;">
+      <button style="width:100%; border-color:rgba(0,245,155,0.4); color:var(--green); background:rgba(0,245,155,0.08); padding:7px;" onclick="openWikiEntry('cbd_ratio')">⚖️ CBD-MISCHUNGS-RATIO ANSEHEN</button>
+    </div>
+    <a class="wv-link" href="${s.url}" target="_blank" style="display:inline-block; margin-top:10px; width:100%; text-align:center;">PROFIL BEI WEEDVIEWER ÖFFNEN ↗</a>
+  `;
+
+  document.getElementById("deductBar").style.display = isGuestMode ? "none" : "flex";
+}
+
+function drawRadar(stats) {
+  const svg = document.getElementById("radarSvg");
+  const cx = 130, cy = 110, r = 70;
+  const axes = [
+    { label: "EUPHORIA", key: "euphoria", val: stats.euphoria },
+    { label: "TACTILE", key: "tactility", val: stats.tactility },
+    { label: "FOCUS", key: "focus", val: stats.focus },
+    { label: "BODY", key: "bodymelt", val: stats.bodyMelt },
+    { label: "SEDATION", key: "sedation", val: stats.sedation }
+  ];
+  const angleStep = (Math.PI * 2) / 5;
+
+  let gridCircles = "";
+  [0.33, 0.66, 1].forEach(scale => {
+    let pts = [];
+    for (let i = 0; i < 5; i++) {
+      let a = i * angleStep - Math.PI / 2;
+      pts.push(`${cx + Math.cos(a) * r * scale},${cy + Math.sin(a) * r * scale}`);
+    }
+    gridCircles += `<polygon points="${pts.join(' ')}" fill="none" stroke="rgba(0,240,255,0.18)" stroke-width="1"/>`;
+  });
+
+  let axisLines = "";
+  let dataPoints = [];
+  axes.forEach((ax, i) => {
+    let a = i * angleStep - Math.PI / 2;
+    let xMax = cx + Math.cos(a) * r;
+    let yMax = cy + Math.sin(a) * r;
+    axisLines += `<line x1="${cx}" y1="${cy}" x2="${xMax}" y2="${yMax}" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>`;
+
+    let xLbl = cx + Math.cos(a) * (r + 22);
+    let yLbl = cy + Math.sin(a) * (r + 22);
+    let color = ax.label === "TACTILE" ? "#ff0055" : "#7ec4f8";
+    axisLines += `
+      <text x="${xLbl}" y="${yLbl + 3}" fill="${color}" font-size="8.5" font-weight="bold" text-anchor="middle" font-family="monospace" 
+            style="cursor:pointer; text-decoration:underline;" onclick="openWikiEntry('${ax.key}')">
+        ${ax.label}
+      </text>
+    `;
+
+    let valRatio = Math.max(0.1, ax.val / 100);
+    dataPoints.push(`${cx + Math.cos(a) * r * valRatio},${cy + Math.sin(a) * r * valRatio}`);
+  });
+
+  svg.innerHTML = `
+    ${gridCircles}
+    ${axisLines}
+    <polygon points="${dataPoints.join(' ')}" fill="rgba(0, 240, 255, 0.25)" stroke="#00f0ff" stroke-width="2"/>
+    ${dataPoints.map(p => {
+      const [x, y] = p.split(',');
+      return `<circle cx="${x}" cy="${y}" r="3" fill="#ff0055" stroke="#fff" stroke-width="1"/>`;
+    }).join('')}
+  `;
+}
+
+function modifyGrams(delta) {
+  if (isGuestMode || !activeId) return;
+  const s = strains.find(item => item.id === activeId);
+  if (!s) return;
+  s.stock = Math.max(0, parseFloat((s.stock + delta).toFixed(2)));
+  saveData();
+  selectStrain(activeId);
+}
+
+function copyChatMenu() {
+  const available = strains.filter(s => s.stock > 0);
+  let text = "❖ CURRENT DISPENSARY / SESSION MENU ❖\n\n";
+
+  const tiers = ["EXOTIC", "LEGENDARY", "EPIC", "UNCOMMON", "CBD"];
+  tiers.forEach(tier => {
+    const list = available.filter(s => s.tier === tier);
+    if (list.length > 0) {
+      const icon = tier === "EXOTIC" ? "🔥" : tier === "LEGENDARY" ? "⭐" : tier === "CBD" ? "🌿" : "⚡";
+      text += `${icon} ${tier} TIER:\n`;
+      list.forEach(s => {
+        text += `• ${s.name} (${s.thc} THC) – ${s.stock.toFixed(1)}g\n  Aroma: ${s.aroma}\n`;
+      });
+      text += "\n";
+    }
+  });
+  text += "Status: Ready for deployment. Welches Target fahren wir?";
+
+  copyToClipboard(text, "📋 MENÜ-TEXT IN ZWISCHENABLAGE KOPIERT!");
+}
+
+function copyLiveLink() {
+  const payload = strains.map(s => ({ id: s.id, stock: s.stock }));
+  const hashVal = btoa(encodeURIComponent(JSON.stringify(payload)));
+  const base = window.location.href.split('#')[0];
+  const fullUrl = `${base}#stash=${hashVal}`;
+
+  copyToClipboard(fullUrl, "🔗 LIVE-STASH-LINK KOPIERT!");
+}
+
+function copyToClipboard(text, successMsg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(successMsg);
+    }).catch(() => fallbackCopy(text, successMsg));
+  } else {
+    fallbackCopy(text, successMsg);
+  }
+}
+
+function fallbackCopy(text, successMsg) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand("copy");
+    showToast(successMsg);
+  } catch (e) {
+    prompt("Manuell kopieren:", text);
+  }
+  document.body.removeChild(ta);
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toastMsg");
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+function openWiki() {
+  document.getElementById("wikiModal").classList.add("open");
+  document.getElementById("wikiSearch").value = "";
+  renderWikiList(WIKI_ENTRIES);
+}
+
+function closeWiki() {
+  document.getElementById("wikiModal").classList.remove("open");
+}
+
+function openWikiEntry(key) {
+  openWiki();
+  const searchInput = document.getElementById("wikiSearch");
+  const normKey = key.toLowerCase();
+  
+  const match = WIKI_ENTRIES.find(e => e.id === normKey || e.keywords.some(k => k.includes(normKey)));
+  if (match) {
+    searchInput.value = match.title.split(" ")[0];
+    renderWikiList([match]);
+  } else {
+    searchInput.value = key;
+    filterWiki();
+  }
+}
+
+function renderWikiList(list) {
+  const body = document.getElementById("wikiBody");
+  if (!body) return;
+  if (list.length === 0) {
+    body.innerHTML = `<div style="text-align:center; padding:20px; color:#5283a8;">Keine passenden Wiki-Einträge gefunden.</div>`;
+    return;
+  }
+
+  body.innerHTML = list.map(e => `
+    <div class="wiki-entry">
+      <div class="wiki-entry-title">
+        <span>${e.title}</span>
+        <span class="wiki-entry-cat">${e.category}</span>
+      </div>
+      <div>${e.content}</div>
+    </div>
+  `).join("");
+}
+
+function filterWiki() {
+  const q = document.getElementById("wikiSearch").value.toLowerCase().trim();
+  if (!q) {
+    renderWikiList(WIKI_ENTRIES);
+    return;
+  }
+  const filtered = WIKI_ENTRIES.filter(e => {
+    return e.title.toLowerCase().includes(q) ||
+           e.content.toLowerCase().includes(q) ||
+           e.keywords.some(k => k.toLowerCase().includes(q));
+  });
+  renderWikiList(filtered);
+}
+
+loadData();
+renderGrid();
+if (strains.length > 0) selectStrain(strains[0].id);
+</script>
+
+</body>
+</html>
